@@ -1,5 +1,5 @@
 /* ==========================================
-   SL HOMESTAY - RESPONSIVE CSS (FIXED HEADER)
+   SML COLIVE - RESPONSIVE CSS (FIXED HEADER)
    ========================================== */
 
 :root {
@@ -18,7 +18,8 @@
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
   padding: 0;
@@ -394,13 +395,21 @@ body {
   position: relative;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
   user-select: none;
   max-width: 100%;
 }
 
+/* One fixed shape for every slide, on every device.
+   object-fit: cover crops each photo to fill this exact box —
+   no matter what size/orientation the original file is,
+   so there is never blank space around an image. */
 .slides-wrapper {
-  width: 100%;
+  position: relative;
+  width: min(760px, 94vw);
+  aspect-ratio: 4 / 3;
+  /* landscape box for laptop/desktop */
   overflow: hidden;
   border-radius: 12px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
@@ -408,19 +417,31 @@ body {
 }
 
 .slide {
-  display: none;
-  width: 100%;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
 }
 
 .slide.active {
-  display: block;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  z-index: 2;
 }
 
-.slide img {
+.slide img,
+.slide video {
   width: 100%;
-  height: auto;
-  max-height: 500px;
+  height: 100%;
   object-fit: cover;
+  /* crops to fill — same rule for every file */
+  object-position: center;
   display: block;
 }
 
@@ -439,10 +460,12 @@ body {
   cursor: pointer;
   z-index: 3;
   flex-shrink: 0;
+  transition: background 0.2s ease, transform 0.15s ease;
 }
 
 .nav:hover {
   background: rgba(0, 0, 0, 0.8);
+  transform: scale(1.05);
 }
 
 /* Dots */
@@ -582,7 +605,7 @@ body {
    ========================================== */
 
 #dining {
-  background: url('../images/dining.jpg') center/cover no-repeat;
+  background: url('../images/dine.jpg') center/cover no-repeat;
   padding: 60px 0;
   position: relative;
 }
@@ -958,6 +981,10 @@ body {
   .dining-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .slides-wrapper {
+    width: min(600px, 90vw);
+  }
 }
 
 /* ==========================================
@@ -965,7 +992,7 @@ body {
    ========================================== */
 
 @media (max-width: 768px) {
-  
+
   /* Adjust CSS variables for mobile */
   :root {
     --header-height: 60px;
@@ -1066,14 +1093,16 @@ body {
     text-align: center;
   }
 
-  /* GALLERY */
+  /* GALLERY — phone gets its own fixed ratio, still the SAME for every image */
   .slideshow {
     flex-direction: column;
     gap: 0;
   }
 
-  .slide img {
-    max-height: 300px;
+  .slides-wrapper {
+    width: min(420px, 92vw);
+    aspect-ratio: 4 / 5;
+    /* taller box suits phone screens & phone-shot photos */
   }
 
   .nav {
@@ -1178,8 +1207,8 @@ body {
     font-size: 22px;
   }
 
-  .slide img {
-    max-height: 240px;
+  .slides-wrapper {
+    width: min(320px, 94vw);
   }
 
   .btn {
@@ -1223,14 +1252,149 @@ body {
 }
 
 /* ==========================================
+   GALLERY LIGHTBOX
+   ========================================== */
+
+.slide img.zoomable,
+.slide video.zoomable {
+  cursor: zoom-in;
+}
+
+.lightbox-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.94);
+  z-index: 3000;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.lightbox-overlay.active {
+  display: flex;
+}
+
+.lightbox-content {
+  max-width: 95vw;
+  max-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightbox-content img,
+.lightbox-content video {
+  max-width: 95vw;
+  max-height: 90vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  border-radius: 8px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-size: 26px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 3002;
+  transition: background 0.2s ease;
+}
+
+.lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  font-size: 22px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3002;
+  transition: background 0.2s ease;
+}
+
+.lightbox-nav:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.lightbox-prev {
+  left: 20px;
+}
+
+.lightbox-next {
+  right: 20px;
+}
+
+@media (max-width: 768px) {
+  .lightbox-overlay {
+    padding: 12px;
+  }
+
+  .lightbox-content img,
+  .lightbox-content video {
+    max-width: 95vw;
+    max-height: 80vh;
+  }
+
+  .lightbox-close {
+    top: 12px;
+    right: 12px;
+    width: 38px;
+    height: 38px;
+    font-size: 22px;
+  }
+
+  .lightbox-nav {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+
+  .lightbox-prev {
+    left: 8px;
+  }
+
+  .lightbox-next {
+    right: 8px;
+  }
+}
+
+/* ==========================================
    PRINT STYLES
    ========================================== */
 
 @media print {
+
   .site-header,
   .floating-icons,
   .nav,
-  .dots {
+  .dots,
+  .lightbox-overlay {
     display: none;
   }
 
